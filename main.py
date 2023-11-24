@@ -2,8 +2,8 @@ import mysql.connector as mysql
 from mysql.connector import Error
 import pandas as pd
 
-user = 'root'
-password = 'Eddy0207'
+user = '...'
+password = '...'
 
 def createdatabase(user:str,passw:str):
     db = mysql.connect(
