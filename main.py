@@ -118,9 +118,9 @@ def dataload(user:str, password:str):
     for _, row in data[['Role', 'Job Title', 'Job Description', 'skills', 'Responsibilities']].iterrows():
         try:
             curs.execute("""
-                INSERT INTO Role (longitude, latitude, location, country)
+                INSERT INTO Role (role, job_title, job_description, skills, responsibilities)
                 VALUES (%s, %s, %s, %s);
-            """, (row['longitude'], row['latitude'], row['location'], row['Country']))
+            """, (row['Role'], row['Job Title'], row['Job Description'], row['skills'], row['Responsibilities']))
             db.commit()
         except Error as e:
             db.rollback()
