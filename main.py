@@ -32,8 +32,8 @@ def creattables(user:str,passw:str):
     curs = db.cursor()
 
     location = "CREATE TABLE Location(" \
-                    "longitude FLOAT(6,4) NOT NULL," \
-                    "latitude FLOAT(6,4) NOT NULL," \
+                    "longitude FLOAT(7,4) NOT NULL," \
+                    "latitude FLOAT(7,4) NOT NULL," \
                     "location VARCHAR(255) NOT NULL," \
                     "country VARCHAR(255) NOT NULL," \
                     "PRIMARY KEY (longitude, latitude)" \
@@ -91,7 +91,9 @@ def dataload(user:str, password:str):
     curs = db.cursor()
     
     # Add data to the Company table
-    for _, row in data[['Company', 'City', 'State', 'Industry', 'Sector', 'Zip', 'CEO', 'Website', 'Ticker']].iterrows():
+    ## The Company column is the primary key; we don't want to insert duplicates
+    company_no_duplicates = data.drop_duplicates(subset='Company')
+    for _, row in company_no_duplicates[['Company', 'City', 'State', 'Industry', 'Sector', 'Zip', 'CEO', 'Website', 'Ticker']].iterrows():
         try:
             curs.execute("""
                 INSERT INTO Company (company, city, state, industry, sector, zip, ceo, website, ticker)
@@ -103,7 +105,9 @@ def dataload(user:str, password:str):
             print(f"Error: '{e}'")
     
     # Add data to the Location table
-    for _, row in data[['longitude', 'latitude', 'location', 'Country']].iterrows():
+    ## The longitude and latitude columns are the primary key; we don't want to insert duplicates 
+    location_no_duplicates = data.drop_duplicates(subset=['longitude', 'latitude'])
+    for _, row in location_no_duplicates[['longitude', 'latitude', 'location', 'Country']].iterrows():
         try:
             curs.execute("""
                 INSERT INTO Location (longitude, latitude, location, country)
@@ -115,11 +119,13 @@ def dataload(user:str, password:str):
             print(f"Error: '{e}'")
 
     # Add data to the Role table
-    for _, row in data[['Role', 'Job Title', 'Job Description', 'skills', 'Responsibilities']].iterrows():
+    ## The Role column is the primary key; we don't want to insert duplicates
+    role_no_duplicates = data.drop_duplicates(subset='Role')
+    for _, row in role_no_duplicates[['Role', 'Job Title', 'Job Description', 'skills', 'Responsibilities']].iterrows():
         try:
             curs.execute("""
                 INSERT INTO Role (role, job_title, job_description, skills, responsibilities)
-                VALUES (%s, %s, %s, %s);
+                VALUES (%s, %s, %s, %s, %s);
             """, (row['Role'], row['Job Title'], row['Job Description'], row['skills'], row['Responsibilities']))
             db.commit()
         except Error as e:
@@ -131,7 +137,7 @@ def dataload(user:str, password:str):
         try:
             curs.execute("""
                 INSERT INTO Offer (job_id, work_type, qualifications, preference, benefits, experience, salary_range, contact, contact_person, company_size)
-                VALUES (%s, %s, %s, %s);
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
             """, (row['Job Id'], row['Work Type'], row['Qualifications'], row['Preference'], row['Benefits'], row['Experience'], row['Salary Range'], row['Contact'], row['Contact Person'], row['Company Size']))
             db.commit()
         except Error as e:
