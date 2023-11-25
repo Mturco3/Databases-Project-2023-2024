@@ -61,7 +61,7 @@ def creattables(user:str,passw:str):
                     ");"
     
     offer = "CREATE TABLE Offer("\
-                    "job_id INT AUTO_INCREMENT PRIMARY KEY," \
+                    "job_id INT NOT NULL PRIMARY KEY," \
                     "work_type VARCHAR(100)," \
                     "qualifications VARCHAR(100)," \
                     "preference VARCHAR(100)," \
