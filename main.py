@@ -2,6 +2,10 @@ import mysql.connector as mysql
 from mysql.connector import Error
 import pandas as pd
 import getpass
+import time
+
+# Remove pandas error message
+pd.options.mode.chained_assignment = None
 
 def createdatabase(user:str,passw:str):
     db = mysql.connect(
@@ -18,6 +22,7 @@ def createdatabase(user:str,passw:str):
                 curs.execute(f'DROP DATABASE Jobs')
                 db.commit()
                 print('The database already exists. The old one was dropped.')
+                time.sleep(1)
 
         curs.execute("CREATE DATABASE Jobs")
         print('The database was created!')
@@ -61,7 +66,7 @@ def creattables(user:str,passw:str):
                     ");"
     
     offer = "CREATE TABLE Offer("\
-                    "job_id INT NOT NULL PRIMARY KEY," \
+                    "job_id BIGINT NOT NULL PRIMARY KEY," \
                     "work_type VARCHAR(100)," \
                     "qualifications VARCHAR(100)," \
                     "preference VARCHAR(100)," \
@@ -92,68 +97,67 @@ def dataload(user:str, password:str):
     
     # Add data to the Company table
     ## The Company column is the primary key; we don't want to insert duplicates
-    company_no_duplicates = data.drop_duplicates(subset='Company')
-    for _, row in company_no_duplicates[['Company', 'City', 'State', 'Industry', 'Sector', 'Zip', 'CEO', 'Website', 'Ticker']].iterrows():
-        try:
-            curs.execute("""
-                INSERT INTO Company (company, city, state, industry, sector, zip, ceo, website, ticker)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
-            """, (row['Company'], row['City'], row['State'], row['Industry'], row['Sector'], row['Zip'], row['CEO'], row['Website'], row['Ticker']))
-            db.commit()
-        except Error as e:
-            db.rollback()
-            print(f"Error: '{e}'")
+    company = data.iloc[:,21:]
+    company.drop_duplicates(subset='Company', inplace = True)
+    curs.executemany("""
+    INSERT INTO Company (company, city, state, industry, sector, zip, ceo, website, ticker)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+""", [tuple(row[['Company', 'City', 'State', 'Industry', 'Sector', 'Zip', 'CEO', 'Website', 'Ticker']]) for _, row in company.iterrows()])
+    db.commit()
+    print('-Company table loaded! ✅')
     
     # Add data to the Location table
     ## The longitude and latitude columns are the primary key; we don't want to insert duplicates 
-    location_no_duplicates = data.drop_duplicates(subset=['longitude', 'latitude'])
-    for _, row in location_no_duplicates[['longitude', 'latitude', 'location', 'Country']].iterrows():
-        try:
-            curs.execute("""
-                INSERT INTO Location (longitude, latitude, location, country)
-                VALUES (%s, %s, %s, %s);
-            """, (row['longitude'], row['latitude'], row['location'], row['Country']))
-            db.commit()
-        except Error as e:
-            db.rollback()
-            print(f"Error: '{e}'")
+    location = data.iloc[:, [6, 7, 5, 4]]
+    location.drop_duplicates(subset=['latitude', 'longitude'], inplace=True)
+    curs.executemany("""
+    INSERT INTO Location (longitude, latitude, location, country)
+    VALUES (%s, %s, %s, %s);
+    """, [tuple(row[['longitude', 'latitude', 'location', 'Country']]) for _, row in location.iterrows()])
+    db.commit()
+    print('-Location table loaded! ✅')
 
     # Add data to the Role table
-    ## The Role column is the primary key; we don't want to insert duplicates
-    role_no_duplicates = data.drop_duplicates(subset='Role')
-    for _, row in role_no_duplicates[['Role', 'Job Title', 'Job Description', 'skills', 'Responsibilities']].iterrows():
-        try:
-            curs.execute("""
-                INSERT INTO Role (role, job_title, job_description, skills, responsibilities)
-                VALUES (%s, %s, %s, %s, %s);
-            """, (row['Role'], row['Job Title'], row['Job Description'], row['skills'], row['Responsibilities']))
-            db.commit()
-        except Error as e:
-            db.rollback()
-            print(f"Error: '{e}'")
+    role = data.iloc[:, [14, 15 ,17 ,19 ,20]]
+    role.drop_duplicates(inplace = True)
+    curs.executemany("""
+    INSERT INTO Role (role, job_title, job_description, skills, responsibilities)
+    VALUES (%s, %s, %s, %s, %s);
+    """, [tuple(row[['Role', 'Job Title', 'Job Description', 'skills', 'Responsibilities']]) for _, row in role.iterrows()])
+    db.commit()
+    print('-Role table loaded! ✅')
 
     # Add data to the Offer table
-    for _, row in data[['Job Id', 'Work Type', 'Qualifications', 'Preference', 'Benefits', 'Experience', 'Salary Range', 'Contact', 'Contact Person', 'Company Size']].iterrows():
-        try:
-            curs.execute("""
-                INSERT INTO Offer (job_id, work_type, qualifications, preference, benefits, experience, salary_range, contact, contact_person, company_size)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-            """, (row['Job Id'], row['Work Type'], row['Qualifications'], row['Preference'], row['Benefits'], row['Experience'], row['Salary Range'], row['Contact'], row['Contact Person'], row['Company Size']))
-            db.commit()
-        except Error as e:
-            db.rollback()
-            print(f"Error: '{e}'")
+    offer = data.iloc[:, [0, 2, 8, 11, 12, 13, 18, 9, 1, 3]]
+    curs.executemany("""
+    INSERT INTO Offer (job_id, work_type, qualifications, preference, benefits, experience, salary_range, contact, contact_person, company_size)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+    """, [tuple(row[['Job Id', 'Work Type', 'Qualifications', 'Preference', 'Benefits', 'Experience', 'Salary Range', 'Contact', 'Contact Person', 'Company Size']]) for _, row in offer.iterrows()])
+    db.commit()
+    print(' -Offer table loaded! ✅')
 
 
 user = 'root'
+print("""
+    _____       __                ______           _                       _    
+   |_   _|     [  |              |_   _ `.        / |_                    / |_  
+     | |  .--.  | |.--.   .--.     | | `. \ ,--. `| |-',--.   .--.  .---.`| |-' 
+ _   | |/ .'`\ \| '/'`\ \( (`\]    | |  | |`'_\ : | | `'_\ : ( (`\]/ /__\\| |   
+| |__' || \__. ||  \__/ | `'.'.   _| |_.' /// | |,| |,// | |, `'.'.| \__.,| |,  
+`.____.' '.__.'[__;.__.' [\__) ) |______.' \'-;__/\__/\'-;__/[\__) )'.__.'\__/  
+                                                                                """)
+
 password = getpass.getpass('Insert password for localhost --> ')
 try:
     print("Creating the database...\n")
+    time.sleep(1)
     createdatabase(user=user, passw=password)
+    time.sleep(1)
     print("Defining tables...\n")
     creattables(user=user, passw=password)
-    print("Loading the dataset into the database...\n")
+    time.sleep(1.5)
+    print("Filling the database...\n")
     dataload(user=user, password=password)
-    print("Database filled!")
+    print("\nDatabase filled!")
 except Error as e:
     print(e)
