@@ -54,7 +54,7 @@ def creattables(user:str,passw:str):
 
     # No unique values in this table
     company = "CREATE TABLE Company("\
-                    "company VARCHAR(255)," \
+                    "company VARCHAR(255) NOT NULL PRIMARY KEY," \
                     "city VARCHAR(255)," \
                     "state VARCHAR(255)," \
                     "industry VARCHAR(255)," \
@@ -75,7 +75,14 @@ def creattables(user:str,passw:str):
                     "salary_range VARCHAR(100)," \
                     "contact VARCHAR(100)," \
                     "contact_person VARCHAR(100)," \
-                    "company_size MEDIUMINT" \
+                    "company_size MEDIUMINT," \
+                    "company VARCHAR(255)," \
+                    "role VARCHAR(255)," \
+                    "latitude FLOAT(7,4)," \
+                    "longitude FLOAT(7,4)," \
+                    "FOREIGN KEY (longitude,latitude) REFERENCES Location(longitude, latitude)," \
+                    "FOREIGN KEY (company) REFERENCES Company(company)," \
+                    "FOREIGN KEY (role) REFERENCES Role(role)" \
                     ");"
     
     curs.execute(location)
@@ -87,6 +94,7 @@ def creattables(user:str,passw:str):
 def dataload(user:str, password:str):
     data = pd.read_csv('jobs_clean.csv', index_col=0)
     data = data.where(pd.notna(data), None)
+    data = data.sample(20000)
     db = mysql.connect(
         host="localhost", 
         user=user, 
@@ -128,13 +136,13 @@ def dataload(user:str, password:str):
     print('-Role table loaded! ✅')
 
     # Add data to the Offer table
-    offer = data.iloc[:, [0, 2, 8, 11, 12, 13, 18, 9, 1, 3]]
+    offer = data.iloc[:, [0, 2, 8, 11, 12, 13, 18, 9, 1, 3, 21, 15, 7, 6]]
     curs.executemany("""
-    INSERT INTO Offer (job_id, work_type, qualifications, preference, benefits, experience, salary_range, contact, contact_person, company_size)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-    """, [tuple(row[['Job Id', 'Work Type', 'Qualifications', 'Preference', 'Benefits', 'Experience', 'Salary Range', 'Contact', 'Contact Person', 'Company Size']]) for _, row in offer.iterrows()])
+    INSERT INTO Offer (job_id, work_type, qualifications, preference, benefits, experience, salary_range, contact, contact_person, company_size, company, role, longitude, latitude)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s);
+    """, [tuple(row[['Job Id', 'Work Type', 'Qualifications', 'Preference', 'Benefits', 'Experience', 'Salary Range', 'Contact', 'Contact Person', 'Company Size','Company','Role','longitude','latitude']]) for _, row in offer.iterrows()])
     db.commit()
-    print(' -Offer table loaded! ✅')
+    print('-Offer table loaded! ✅')
 
 
 user = 'root'
