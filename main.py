@@ -80,6 +80,8 @@ def creattables(user:str,passw:str):
                     "role VARCHAR(255)," \
                     "latitude FLOAT(7,4)," \
                     "longitude FLOAT(7,4)," \
+                    "job_posting_date DATE," \
+                    "job_portal VARCHAR(100)," \
                     "FOREIGN KEY (longitude,latitude) REFERENCES Location(longitude, latitude)," \
                     "FOREIGN KEY (company) REFERENCES Company(company)," \
                     "FOREIGN KEY (role) REFERENCES Role(role)" \
@@ -136,11 +138,11 @@ def dataload(user:str, password:str):
     print('-Role table loaded! ✅')
 
     # Add data to the Offer table
-    offer = data.iloc[:, [0, 2, 8, 11, 12, 13, 18, 9, 1, 3, 21, 15, 7, 6]]
+    offer = data.iloc[:, [0, 2, 8, 11, 12, 13, 18, 9, 1, 3, 21, 15, 7, 6, 10, 16]]
     curs.executemany("""
-    INSERT INTO Offer (job_id, work_type, qualifications, preference, benefits, experience, salary_range, contact, contact_person, company_size, company, role, longitude, latitude)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s);
-    """, [tuple(row[['Job Id', 'Work Type', 'Qualifications', 'Preference', 'Benefits', 'Experience', 'Salary Range', 'Contact', 'Contact Person', 'Company Size','Company','Role','longitude','latitude']]) for _, row in offer.iterrows()])
+    INSERT INTO Offer (job_id, work_type, qualifications, preference, benefits, experience, salary_range, contact, contact_person, company_size, company, role, longitude, latitude, job_posting_date, job_portal)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s);
+    """, [tuple(row[['Job Id', 'Work Type', 'Qualifications', 'Preference', 'Benefits', 'Experience', 'Salary Range', 'Contact', 'Contact Person', 'Company Size','Company','Role','longitude','latitude', 'Job Posting Date', 'Job Portal' ]]) for _, row in offer.iterrows()])
     db.commit()
     print('-Offer table loaded! ✅')
 
