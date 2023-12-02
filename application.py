@@ -18,17 +18,19 @@ def queries(user, password):
 '\nSelect the query you want to execute:\n \
 ===========================================\n \
 0) - Quit\n \
-1) - Calculate Average Salary and Average required experience by gender for a selected role\n'
+1) - Calculate Average Salary and Average required experience by gender for a selected role\n \
+2) - Display Job Offers available in a specific Country'
 )
                         
             desired_query = int(input('\nYour choice -> '))
+            print("")
 
             with open('queries.sql') as f:
                 query_file = f.read().split(";")
 
             if desired_query == 0:
                 break
-            
+
             elif desired_query == 1:
                 curs.execute("SELECT DISTINCT role FROM Offer")
                 roles = [row[0] for row in curs.fetchall()]
@@ -58,9 +60,32 @@ def queries(user, password):
                     print("Invalid input!")    
 
             elif desired_query == 2:
-                ...
+                curs.execute("SELECT DISTINCT country FROM Location ORDER BY country ASC")
+                countries = [row[0] for row in curs.fetchall()]
+                for country in countries:
+                    print("- " + country)
+                try:
+                    selected_country = input("\nSelect your Country: ")
+                    query = query_file[1].replace(":user_country", selected_country)
+                    curs.execute(query)
+                    rows = curs.fetchall()
+
+                    if not rows:
+                        print('No results for this research!')
+                    else:
+                        print(f'\nHere are the results for "{selected_country}":\n')
+
+                    for element in rows:
+                        print(f'>Job Title: {element[2]}\n Company name: {element[3]}\n Job Id: {element[0]}\n Job posting date: {element[1]}\n')
+                    print(f"∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾\n {len(rows)} job offers found!\n∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾")
+                    time.sleep(1)
+
+                except Exception as e:
+                    print(e)
+
+
                      
 
             
 queries(user = 'root', password=main.psw)
-print('Goodbye')
+print('\nGoodbye')

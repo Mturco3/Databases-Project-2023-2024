@@ -8,3 +8,20 @@ FROM Offer
 WHERE role = ':user_role'
 GROUP BY role;
     
+SELECT 
+    Offer.job_id,
+    Offer.job_posting_date,
+    Role.job_title,
+    Company.company
+FROM 
+    Offer
+JOIN 
+    Location ON Offer.latitude = Location.latitude AND Offer.longitude = Location.longitude
+JOIN 
+    Role ON Offer.role = Role.role
+JOIN 
+    Company ON Offer.company = Company.company
+WHERE 
+    Location.country = ':user_country' -- Specify a desired city
+ORDER BY 
+    Offer.job_posting_date DESC;
