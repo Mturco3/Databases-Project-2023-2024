@@ -32,7 +32,7 @@ def queries(user, password):
                 break
 
             elif desired_query == 1:
-                curs.execute("SELECT DISTINCT role FROM Offer")
+                curs.execute("SELECT DISTINCT role FROM Offer ORDER BY role ASC")
                 roles = [row[0] for row in curs.fetchall()]
                 print("Available roles:")
                 for i, role in enumerate(roles, start=1):
