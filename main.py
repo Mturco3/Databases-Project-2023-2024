@@ -71,8 +71,6 @@ def creattables(user:str,passw:str):
                     "qualifications VARCHAR(100)," \
                     "preference VARCHAR(100)," \
                     "benefits VARCHAR(255)," \
-                    "experience VARCHAR(100)," \
-                    "salary_range VARCHAR(100)," \
                     "contact VARCHAR(100)," \
                     "contact_person VARCHAR(100)," \
                     "company_size MEDIUMINT," \
@@ -82,6 +80,10 @@ def creattables(user:str,passw:str):
                     "longitude FLOAT(7,4)," \
                     "job_posting_date DATE," \
                     "job_portal VARCHAR(100)," \
+                    "min_experience_years SMALLINT," \
+                    "max_experience_years SMALLINT," \
+                    "min_salary VARCHAR(10)," \
+                    "max_salary VARCHAR(10)," \
                     "FOREIGN KEY (longitude,latitude) REFERENCES Location(longitude, latitude)," \
                     "FOREIGN KEY (company) REFERENCES Company(company)," \
                     "FOREIGN KEY (role) REFERENCES Role(role)" \
@@ -94,9 +96,7 @@ def creattables(user:str,passw:str):
     
 
 def dataload(user:str, password:str):
-    data = pd.read_csv('jobs_clean.csv', index_col=0)
-    data = data.where(pd.notna(data), None)
-    data = data.sample(20000)
+    data = pd.read_csv('data/jobs_sample.csv', index_col=0).dropna()
     db = mysql.connect(
         host="localhost", 
         user=user, 
@@ -107,7 +107,7 @@ def dataload(user:str, password:str):
     
     # Add data to the Company table
     ## The Company column is the primary key; we don't want to insert duplicates
-    company = data.iloc[:,21:]
+    company = data.iloc[:, 21:]
     company.drop_duplicates(subset='Company', inplace = True)
     curs.executemany("""
     INSERT INTO Company (company, city, state, industry, sector, zip, ceo, website, ticker)
@@ -129,7 +129,7 @@ def dataload(user:str, password:str):
 
     # Add data to the Role table
     role = data.iloc[:, [14, 15 ,17 ,19 ,20]]
-    role.drop_duplicates(inplace = True)
+    role.drop_duplicates(subset = 'Role', inplace = True)
     curs.executemany("""
     INSERT INTO Role (role, job_title, job_description, skills, responsibilities)
     VALUES (%s, %s, %s, %s, %s);
@@ -139,35 +139,56 @@ def dataload(user:str, password:str):
 
     # Add data to the Offer table
     offer = data.iloc[:, [0, 2, 8, 11, 12, 13, 18, 9, 1, 3, 21, 15, 7, 6, 10, 16]]
+    # Splitting the Experience column
+    offer['Min Experience Years'] = offer['Experience'].apply(lambda row: row[0])
+    offer['Max Experience Years'] = offer['Experience'].apply(lambda row: row[5:7])
+    offer.drop('Experience', axis = 1, inplace = True)
+    # Splitting the Salary range column
+    offer['Min Salary'] = offer['Salary Range'].apply(lambda row: row[0:4])
+    offer['Max Salary'] = offer['Salary Range'].apply(lambda row: row[5:])
+    def convert_salary(salary):
+        numeric_part = salary[1:-1]  # Remove '$' at the beginning and 'K' at the end
+        return int(numeric_part) * 1000
+    offer['Min Salary'] = offer['Min Salary'].apply(convert_salary)
+    offer['Max Salary'] = offer['Max Salary'].apply(convert_salary)
+    # Formatting the Benefits column
+    offer['Benefits'] = offer['Benefits'].apply(lambda row: row[2:-2])
+    offer.drop('Salary Range', axis = 1, inplace = True)
     curs.executemany("""
-    INSERT INTO Offer (job_id, work_type, qualifications, preference, benefits, experience, salary_range, contact, contact_person, company_size, company, role, longitude, latitude, job_posting_date, job_portal)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s);
-    """, [tuple(row[['Job Id', 'Work Type', 'Qualifications', 'Preference', 'Benefits', 'Experience', 'Salary Range', 'Contact', 'Contact Person', 'Company Size','Company','Role','longitude','latitude', 'Job Posting Date', 'Job Portal' ]]) for _, row in offer.iterrows()])
+    INSERT INTO Offer (job_id, work_type, qualifications, preference, benefits,  min_experience_years, max_experience_years, contact, contact_person, company_size, company, role, longitude, latitude, job_posting_date, job_portal, min_salary, max_salary)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s, %s, %s);
+    """, [tuple(row[['Job Id', 'Work Type', 'Qualifications', 'Preference', 'Benefits', 'Min Experience Years', 'Max Experience Years', 'Contact', 'Contact Person', 'Company Size','Company','Role','longitude','latitude', 'Job Posting Date', 'Job Portal', 'Min Salary', 'Max Salary']]) for _, row in offer.iterrows()])
     db.commit()
     print('-Offer table loaded! ✅')
 
+psw = getpass.getpass('Insert password for localhost --> ')
 
-user = 'root'
-print("""
+if __name__ == '__main__':
+
+    print("""
     _____       __                ______           _                       _    
-   |_   _|     [  |              |_   _ `.        / |_                    / |_  
-     | |  .--.  | |.--.   .--.     | | `. \ ,--. `| |-',--.   .--.  .---.`| |-' 
- _   | |/ .'`\ \| '/'`\ \( (`\]    | |  | |`'_\ : | | `'_\ : ( (`\]/ /__\\| |   
+|_   _|     [  |              |_   _ `.        / |_                    / |_  
+    | |  .--.  | |.--.   .--.     | | `. \ ,--. `| |-',--.   .--.  .---.`| |-' 
+_   | |/ .'`\ \| '/'`\ \( (`\]    | |  | |`'_\ : | | `'_\ : ( (`\]/ /__\\| |   
 | |__' || \__. ||  \__/ | `'.'.   _| |_.' /// | |,| |,// | |, `'.'.| \__.,| |,  
 `.____.' '.__.'[__;.__.' [\__) ) |______.' \'-;__/\__/\'-;__/[\__) )'.__.'\__/  
                                                                                 """)
+    
+    user = 'root'
+    password = psw
 
-password = getpass.getpass('Insert password for localhost --> ')
-try:
-    print("Creating the database...\n")
-    time.sleep(1)
-    createdatabase(user=user, passw=password)
-    time.sleep(1)
-    print("Defining tables...\n")
-    creattables(user=user, passw=password)
-    time.sleep(1.5)
-    print("Filling the database...\n")
-    dataload(user=user, password=password)
-    print("\nDatabase filled!")
-except Error as e:
-    print(e)
+    try:
+        print("Creating the database...\n")
+        time.sleep(1)
+        createdatabase(user=user, passw=password)
+        time.sleep(1)
+        print("Defining tables...\n")
+        creattables(user=user, passw=password)
+        time.sleep(1.5)
+        print("Filling the database...\n")
+        dataload(user=user, password=password)
+        print("\nDatabase filled!")
+    except Error as e:
+        print(e)
+
+
