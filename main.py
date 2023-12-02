@@ -96,7 +96,7 @@ def creattables(user:str,passw:str):
     
 
 def dataload(user:str, password:str):
-    data = pd.read_csv('data/jobs_sample.csv', index_col=0).dropna()
+    data = pd.read_csv('jobs_sample.csv', index_col=0).dropna()
     db = mysql.connect(
         host="localhost", 
         user=user, 

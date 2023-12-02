@@ -11,3 +11,21 @@
 #     # Compute the average salary and average required experience for a specific role (input from user) both for male and female candidates
 #     ## the query should return the two averages both for male and female candidates (check preference attribute in Offer table)
 #     # retrurn all roles avaiable with their max salary and the company that offers the max salary for that role
+
+
+with open('test_query.sql') as f:
+                query_file = f.read()
+                queries = query_file.split(';')
+                # Get user input for the desired role
+                desired_role = input("Enter the role you prefer: ")
+                
+                # Replace the placeholder in the query with user input
+                query = query_file.replace(":user_role", desired_role)
+                curs.execute(queries[desired_query - 1])
+                rows = curs.fetchall()
+                if not rows:
+                    print('No results for this research!')
+                else:
+                    print('Here are the results of your research:')
+                    print([x for x in rows])
+                    time.sleep(1)
