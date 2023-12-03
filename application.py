@@ -19,7 +19,11 @@ def queries(user, password):
 ===========================================\n \
 0) - Quit\n \
 1) - Calculate Average Salary and Average required experience by gender for a selected role\n \
-2) - Display Job Offers available in a specific Country'
+2) - Display Job Offers available in a specific Country\n \
+3) - Search by company name the job portals where the company is present and how many job offers are available\n \
+4) - Search by key word a job description to discover correlated benefits and responsabilities\n \
+5) - Title of study'
+
 )
                         
             desired_query = int(input('\nYour choice -> '))
@@ -83,6 +87,62 @@ def queries(user, password):
                 except Exception as e:
                     print(e)
 
+            elif desired_query == 3:
+                curs.execute("SELECT DISTINCT company FROM Company ORDER BY company ASC")
+                companies = [row[0] for row in curs.fetchall()]
+                print("Available companies:")
+                for i, company in enumerate(companies, start=1):
+                    print(f"{i}. {company}")
+                # Get user input for the desired role
+                try:
+                    choice = int(input("\nEnter the number corresponding to the company you prefer: "))
+                    if 1 <= choice <= len(companies):
+                        desired_company = companies[choice - 1]
+                        # Replace the placeholder with the desired role
+                        query = query_file[2].replace(":user_company", desired_company)
+                        curs.execute(query)
+                        rows = curs.fetchall()
+                         # Display results
+                        if not rows:
+                            print('No results for this research!')
+                        else:
+                            print(f'\nHere are the results for the company "{desired_company}":')
+                            for element in rows:
+                                print(f'Job Portal: {element[1]} ,\nNumber of job offers: {element[2]}')
+                            time.sleep(1)
+                    else:
+                         print("Invalid input!") 
+                except ValueError:
+                    print("Invalid input!")  
+
+            elif desired_query == 4:
+                curs.execute("SELECT DISTINCT job_description FROM Offer LIMIT 6")
+                job_descriptions = [row[0] for row in curs.fetchall()]
+                print("Here some hints:")
+                for i, job_description in enumerate(job_descriptions, start=1):
+                    print(f"{i}. {job_descriptions}")
+                try:
+                    choice = int(input("\nEnter the key word that you want to match a job description with: "))
+                    if 1 <= choice <= len(job_descriptions):
+                        desired_company = companies[choice - 1]
+                        # Replace the placeholder with the desired role
+                        query = query_file[2].replace(":user_company", desired_company)
+                        curs.execute(query)
+                        rows = curs.fetchall()
+                         # Display results
+                        if not rows:
+                            print('No results for this research!')
+                        else:
+                            print(f'\nHere are the results for the company "{desired_company}":')
+                            for element in rows:
+                                print(f'Job Portal: {element[1]} ,\nNumber of job offers: {element[2]}')
+                            time.sleep(1)
+                    else:
+                         print("Invalid input!") 
+                except ValueError:
+                    print("Invalid input!")  
+
+                    
 
                      
 print("""
