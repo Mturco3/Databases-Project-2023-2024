@@ -1,6 +1,12 @@
 import mysql.connector as mysql
 import time
 import getpass
+from rich import print
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+
+console = Console()
 
 def queries(user, password):
     db = mysql.connect(
@@ -14,16 +20,15 @@ def queries(user, password):
         db.commit()
 
         while True:
-            print(
-'\nSelect the query you want to execute:\n \
-===========================================\n \
-0) - Quit\n \
+            print(Panel(
+' 0) - Quit\n \
 1) - Calculate Average Salary and Average required experience by gender for a selected role\n \
 2) - Display Job Offers available in a specific Country\n \
 3) - Search by company name the job portals where the company is present and how many job offers are available\n \
 4) - Search by key word a job description to discover correlated benefits and responsabilities\n \
-5) - Title of study'
-
+5) - Title of study',
+title = "[bold yellow]Select the query you want to execute"
+     )
 )
                         
             desired_query = int(input('\nYour choice -> '))
@@ -77,12 +82,17 @@ def queries(user, password):
                     if not rows:
                         print('No results for this research!')
                     else:
-                        print(f'\nHere are the results for "{selected_country}":\n')
+                        table = Table(title=f"{len(rows)} results for {selected_country}:")
+                        table.add_column("Job Title", justify="center", no_wrap=True)
+                        table.add_column("Company name", justify="center", no_wrap=True)
+                        table.add_column("Job Id", justify="center", no_wrap=True)
+                        table.add_column("Job posting date", justify="center", no_wrap=True)
 
-                    for element in rows:
-                        print(f'>Job Title: {element[2]}\n Company name: {element[3]}\n Job Id: {element[0]}\n Job posting date: {element[1]}\n')
-                    print(f"∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾\n {len(rows)} job offers found!\n∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾")
-                    time.sleep(1)
+                        for element in rows:
+                            table.add_row(element[2], element[3], str(element[0]), str(element[1]))
+
+                        with console.pager():
+                            console.print(table)
 
                 except Exception as e:
                     print(e)
@@ -156,4 +166,4 @@ print("""
 password = getpass.getpass('Insert password for localhost --> ')
 
 queries(user = 'root', password=password)
-print('\nGoodbye')
+console.print("Goodbye", style = 'bold #96EFFF')

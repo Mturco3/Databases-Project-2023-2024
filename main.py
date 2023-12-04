@@ -3,9 +3,12 @@ from mysql.connector import Error
 import pandas as pd
 import getpass
 import time
+from rich.console import Console
+from rich import print
 
 # Remove pandas error message
 pd.options.mode.chained_assignment = None
+console = Console()
 
 def createdatabase(user:str,passw:str):
     db = mysql.connect(
@@ -21,11 +24,11 @@ def createdatabase(user:str,passw:str):
             if 'Jobs' == x[0]:
                 curs.execute(f'DROP DATABASE Jobs')
                 db.commit()
-                print('The database already exists. The old one was dropped.')
+                print('\n[bold #E48F45]The database already exists. The old one was dropped.')
                 time.sleep(1)
 
         curs.execute("CREATE DATABASE Jobs")
-        print('The database was created!')
+        print('\n[bold green]The database was created!')
 
 def creattables(user:str,passw:str):
     db = mysql.connect(
@@ -114,7 +117,6 @@ def dataload(user:str, password:str):
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
 """, [tuple(row[['Company', 'City', 'State', 'Industry', 'Sector', 'Zip', 'CEO', 'Website', 'Ticker']]) for _, row in company.iterrows()])
     db.commit()
-    print('-Company table loaded! ✅')
     
     # Add data to the Location table
     ## The longitude and latitude columns are the primary key; we don't want to insert duplicates 
@@ -125,7 +127,6 @@ def dataload(user:str, password:str):
     VALUES (%s, %s, %s, %s);
     """, [tuple(row[['longitude', 'latitude', 'location', 'Country']]) for _, row in location.iterrows()])
     db.commit()
-    print('-Location table loaded! ✅')
 
     # Add data to the Role table
     role = data.iloc[:, [14, 15 ,17 ,19 ,20]]
@@ -135,7 +136,6 @@ def dataload(user:str, password:str):
     VALUES (%s, %s, %s, %s, %s);
     """, [tuple(row[['Role', 'Job Title', 'Job Description', 'skills', 'Responsibilities']]) for _, row in role.iterrows()])
     db.commit()
-    print('-Role table loaded! ✅')
 
     # Add data to the Offer table
     offer = data.iloc[:, [0, 2, 8, 11, 12, 13, 18, 9, 1, 3, 21, 15, 7, 6, 10, 16]]
@@ -159,7 +159,6 @@ def dataload(user:str, password:str):
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s, %s, %s);
     """, [tuple(row[['Job Id', 'Work Type', 'Qualifications', 'Preference', 'Benefits', 'Min Experience Years', 'Max Experience Years', 'Contact', 'Contact Person', 'Company Size','Company','Role','longitude','latitude', 'Job Posting Date', 'Job Portal', 'Min Salary', 'Max Salary']]) for _, row in offer.iterrows()])
     db.commit()
-    print('-Offer table loaded! ✅')
 
 if __name__ == '__main__':
 
@@ -175,16 +174,18 @@ if __name__ == '__main__':
     password = getpass.getpass('Insert password for localhost --> ')
 
     try:
-        print("Creating the database...\n")
-        time.sleep(1)
-        createdatabase(user=user, passw=password)
-        time.sleep(1)
-        print("Defining tables...\n")
-        creattables(user=user, passw=password)
-        time.sleep(1.5)
-        print("Filling the database...\n")
-        dataload(user=user, password=password)
-        print("\nDatabase filled!")
+        with console.status("[italic]Creating the database...", spinner='line') as status:
+            time.sleep(1)
+            createdatabase(user=user, passw=password)
+            time.sleep(1)
+            console.log("[italic]Defining tables...")
+            time.sleep(1)
+            creattables(user=user, passw=password)
+            time.sleep(1)
+            status.update(status = "[italic]Filling the database...", spinner = 'material')
+            time.sleep(1)
+            dataload(user=user, password=password)
+        print("\n[bold green]Database filled!")
     except Error as e:
         print(e)
 
