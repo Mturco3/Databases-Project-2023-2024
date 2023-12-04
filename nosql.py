@@ -109,45 +109,7 @@ def query1():
 
 
 def query2():
-    user_input_job_title = input("Specify the desired Job Title -> ")  # Replace with the user's input
-
-    pipeline_dynamic = [
-        {
-            "$match": {
-                "Job.title": user_input_job_title
-            }
-        },
-        {
-            "$group": {
-                "_id": "$Job.location",
-                "count": {"$sum": 1}
-            }
-        },
-        {
-            "$sort": {"count": -1}
-        },
-        {
-            "$limit": 3
-        },
-        {
-            "$project": {
-                "_id": 0,
-                "location": "$_id",
-                "count": 1
-            }
-        }
-    ]
-
-    result = jobs_collection.aggregate(pipeline_dynamic)
-
-    table = Table(title=f"Top 3 locations for the job title '{user_input_job_title}'", leading=1, show_lines=True)
-    table.add_column("Location")
-    table.add_column("Number of Listings", justify="center")
-    for item in result:
-        table.add_row(str(item['location']), str(item['count']))
-
-    with console.pager():
-        console.print(table)
+    ...
 
 
 def query3():
