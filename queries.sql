@@ -36,14 +36,13 @@ WHERE C.company = ':user_company'  -- Replace 'YourCompany' with the specific co
 GROUP BY C.company, O.job_portal;
 
 SELECT
-    R.role,
+    O.job_id,
     R.job_title,
-    O.job_description,
     R.responsibilities,
     O.benefits
-FROM Offer O, Role R
-WHERE O.job_description LIKE '%:user_input%',  -- Replace 'user_input' with the user's input
-    AND O.role = R.role;
+FROM Offer O, Role R 
+WHERE O.role = R.role AND R.job_title = ':user_job' 
+
  
     
 
