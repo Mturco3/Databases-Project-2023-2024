@@ -36,14 +36,29 @@ WHERE C.company = ':user_company'  -- Replace 'YourCompany' with the specific co
 GROUP BY C.company, O.job_portal;
 
 SELECT
-    O.job_id,
-    R.job_title,
-    R.responsibilities,
-    O.benefits
-FROM Offer O, Role R 
-WHERE O.role = R.role AND R.job_title = ':user_job' 
+    O.qualifications,
+    O.role,
+    ROUND(MAX(O.max_salary),1) AS max_salary,
+    ROUND(MIN(O.min_salary),1) AS min_salary,
+    ROUND(MAX(O.max_experience_years),1) AS max_experience,
+    ROUND(MIN(O.min_experience_years),1) AS min_experience
+FROM Offer O
+WHERE O.qualifications = ':user_input'-- Replace 'YourJob' with the specific job title you're searching for
+GROUP BY O.qualifications, O.role;
 
- 
+SELECT O.job_title
+FROM Offer O
+JOIN Company C ON O.company = C.company
+WHERE C.company = ':user_company'  -- Replace 'CEOName' with the specific CEO you're interested in
+  AND C.country IN (
+    SELECT L.country
+    FROM Location L
+    WHERE L.latitude BETWEEN 10.0 AND 20.0  -- Replace with the desired latitude range
+      AND L.longitude BETWEEN -10.0 AND 10.0  -- Replace with the desired longitude range
+  );
+
+
+
     
 
 

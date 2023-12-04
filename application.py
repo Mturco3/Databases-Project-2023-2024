@@ -26,7 +26,7 @@ def queries(user, password):
 1) - Calculate Average Salary and Average required experience by gender for a selected role\n \
 2) - Display Job Offers available in a specific Country\n \
 3) - Search by company name the job portals where the company is present and how many job offers are available\n \
-4) - Discover benefits and responsabilities for a given Job\n \
+4) - Discover the maximum and minimum salary for a given university degree\n \
 5) - Title of study',
 title = "[bold yellow]Select the query you want to execute"
      )
@@ -146,29 +146,31 @@ title = "[bold yellow]Select the query you want to execute"
                     print(e) 
 
             elif desired_query == 4:
-                curs.execute("SELECT DISTINCT job_title FROM Role ORDER BY job_title ASC")
+                curs.execute("SELECT DISTINCT qualifications FROM Offer ORDER BY qualifications ASC")
                 job_titles = [row[0] for row in curs.fetchall()]
-                table = Table(title=f"Here some hints:", box=box.ASCII)
+                table = Table(title=f"University Degrees:", box=box.ASCII)
                 table.add_column("Job Titles")
                 for i, job_title in enumerate(job_titles, start=1):
                     table.add_row(f"{i}. {job_title}")
                 console.print(table)
                 try:
-                    selected_job = input("\nSelect your hint: ")
-                    query = query_file[3].replace(':user_job', selected_job)
+                    selected_degree = input("\nSelect your university degree: ")
+                    query = query_file[3].replace(':user_input', selected_degree)
                     curs.execute(query)
                     rows = curs.fetchall()
                      # Display results
                     if not rows:
                         print('No results for this research!')
                     else:
-                        table = Table(title=f"Results for {selected_job}:")
-                        table.add_column("Job_id", justify="center", no_wrap=True)
-                        table.add_column("Responsabilities", justify="center", no_wrap=True)
-                        table.add_column("Benefits", justify="center", no_wrap=True)
+                        table = Table(title=f"Results for {selected_degree}:")
+                        table.add_column("Role", justify="center", no_wrap=True)
+                        table.add_column("Max Salary", justify="center", no_wrap=True)
+                        table.add_column("Min Salary", justify="center", no_wrap=True)
+                        table.add_column("Max Experience", justify="center", no_wrap=True)
+                        table.add_column("Min Experience", justify="center", no_wrap=True)
 
                         for element in rows:
-                            table.add_row(str(element[0]), str(element[2]), str(element[3]))
+                            table.add_row(str(element[1]), str(element[2]), str(element[3]), str(element[4]), str(element[5]))
 
                         with console.pager():
                             console.print(table)
