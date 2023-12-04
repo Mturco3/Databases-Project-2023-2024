@@ -228,4 +228,4 @@ print("""
 password = getpass.getpass('Insert password for localhost --> ')
 
 queries(user = 'root', password=password)
-console.print("Goodbye", style = 'bold #96EFFF')
+console.print("Goodbye 👋", style = 'bold #96EFFF')
