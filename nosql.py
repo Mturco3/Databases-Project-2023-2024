@@ -119,34 +119,36 @@ def query3():
 def query4():
     ...
 
-# Print out existing databases and collections
-print(client.list_database_names())
-print(jobs_db.list_collection_names())
+if __name__ == '__main__':
+    # Print out existing databases and collections
+    print(client.list_database_names())
+    print(jobs_db.list_collection_names())
 
-# Load the data into the database
-data = pd.read_csv("jobs_sample.csv", index_col=0)
-# jobs_collection.delete_many({})
-# load_data(data)
+    data = pd.read_csv("jobs_sample.csv", index_col=0)
 
-# Print out the first 5 elements in the database
-# cursor = jobs_collection.find()
-# for document in cursor[:5]:
-#     printer.pprint(document)
+    # Check if there's the need to load the data
+    if jobs_collection.count_documents(filter = {}) == 0:
+        load_data(data)
 
-while True:
-    print(Panel(
-' 0) - Quit\n \
+    # Print out the first 5 elements in the database
+    # cursor = jobs_collection.find()
+    # for document in cursor[:5]:
+    #     printer.pprint(document)
+
+    while True:
+        print(Panel(
+    ' 0) - Quit\n \
 1) - Find the top 3 most required skills by company',
-title = "[bold yellow]Select the query you want to execute"
-     )
-)
+    title = "[bold yellow]Select the query you want to execute"
+        )
+    )
 
-    desired_query = int(input('\nYour choice -> '))
-    
-    if desired_query == 0:
-        break
+        desired_query = int(input('\nYour choice -> '))
+        
+        if desired_query == 0:
+            break
 
-    elif desired_query == 1:
-        query1()
+        elif desired_query == 1:
+            query1()
 
-console.print("\nGoodbye 👋", style = 'bold #96EFFF')
+    console.print("\nGoodbye 👋", style = 'bold #96EFFF')
