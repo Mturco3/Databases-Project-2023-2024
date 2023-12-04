@@ -27,7 +27,7 @@ def queries(user, password):
 2) - Display Job Offers available in a specific Country\n \
 3) - Search by company name the job portals where the company is present and how many job offers are available\n \
 4) - Discover the maximum and minimum salary for a given university degree\n \
-5) - Title of study',
+5) - Find the full time avaiable positions in a specific country',
 title = "[bold yellow]Select the query you want to execute"
      )
 )
@@ -178,6 +178,41 @@ title = "[bold yellow]Select the query you want to execute"
  
                 except ValueError:
                     print("Invalid input!")  
+
+            elif desired_query == 5:
+                curs.execute("SELECT DISTINCT industry FROM Company ORDER BY industry ASC")
+                industries = [row[0] for row in curs.fetchall()]
+                table = Table(title=f"Available industries", box=box.ASCII)
+                table.add_column("Industry Name")
+                for i, industry in enumerate(industries, start=1):
+                    table.add_row(f"{i}. {industry}")
+                console.print(table)
+                
+                # Get user input for the desired role
+                try:
+                    choice = int(input("\nEnter the number corresponding to the industry you prefer: "))
+                    if 1 <= choice <= len(industries):
+                        desired_industry = industries[choice - 1]
+                        # Replace the placeholder with the desired role
+                        query = query_file[4].replace(":user_industry", desired_industry)
+                        curs.execute(query)
+                        rows = curs.fetchall()
+                         # Display results
+                        if not rows:
+                            print('No results for this research!')
+                        else:
+                            table = Table(title=f"{len(rows)} results for {desired_industry}:")
+                            table.add_column("Role Avaiable", justify="center", no_wrap=True)
+                            table.add_column("Company", justify="center", no_wrap=True)
+                            table.add_column("Job ID", justify="center", no_wrap=True)
+                        
+                        for element in rows:
+                            table.add_row(str(element[0]), str(element[2]), str(element[1]))
+
+                        with console.pager():
+                            console.print(table) 
+                except Exception as e:
+                    print(e) 
 
                     
 

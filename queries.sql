@@ -46,17 +46,14 @@ FROM Offer O
 WHERE O.qualifications = ':user_input'-- Replace 'YourJob' with the specific job title you're searching for
 GROUP BY O.qualifications, O.role;
 
-SELECT O.job_title
+SELECT O.role, O.job_id, O.company
 FROM Offer O
-JOIN Company C ON O.company = C.company
-WHERE C.company = ':user_company'  -- Replace 'CEOName' with the specific CEO you're interested in
-  AND C.country IN (
-    SELECT L.country
-    FROM Location L
-    WHERE L.latitude BETWEEN 10.0 AND 20.0  -- Replace with the desired latitude range
-      AND L.longitude BETWEEN -10.0 AND 10.0  -- Replace with the desired longitude range
-  );
-
+WHERE work_type = 'Full-Time' 
+  AND O.company IN (
+    SELECT C.company
+    FROM Company C
+    WHERE C.industry = ':user_industry'  -- Replace 'YourIndustry' with the specific industry you're interested in
+);
 
 
     
