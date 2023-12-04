@@ -5,6 +5,7 @@ from rich import print
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+from rich import box
 
 console = Console()
 
@@ -71,8 +72,11 @@ title = "[bold yellow]Select the query you want to execute"
             elif desired_query == 2:
                 curs.execute("SELECT DISTINCT country FROM Location ORDER BY country ASC")
                 countries = [row[0] for row in curs.fetchall()]
+                table = Table(title=f"Available countries", box=box.ASCII)
+                table.add_column("Country Name")
                 for country in countries:
-                    print("- " + country)
+                    table.add_row(country)
+                console.print(table)
                 try:
                     selected_country = input("\nSelect your Country: ")
                     query = query_file[1].replace(":user_country", selected_country)
