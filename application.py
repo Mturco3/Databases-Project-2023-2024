@@ -44,9 +44,12 @@ title = "[bold yellow]Select the query you want to execute"
             elif desired_query == 1:
                 curs.execute("SELECT DISTINCT role FROM Offer ORDER BY role ASC")
                 roles = [row[0] for row in curs.fetchall()]
-                print("Available roles:")
+                table = Table(title=f"Available roles", box=box.ASCII)
+                table.add_column("Role Name")
                 for i, role in enumerate(roles, start=1):
-                    print(f"{i}. {role}")
+                    table.add_row(f"{i}. {role}")
+                console.print(table)
+                
                 # Get user input for the desired role
                 try:
                     choice = int(input("\nEnter the number corresponding to the role you prefer: "))
@@ -56,18 +59,25 @@ title = "[bold yellow]Select the query you want to execute"
                         query = query_file[0].replace(":user_role", desired_role)
                         curs.execute(query)
                         rows = curs.fetchall()
-                         # Display results
-                        if not rows:
-                            print('No results for this research!')
-                        else:
-                            print(f'\nHere are the results for the role "{desired_role}":')
-                            for element in rows:
-                                print(f'Selected Role: {element[0]} ,\nAverage male salary: {element[1]} £, Average experience required to apply: {element[2]} years,\nAverage female salary: {element[3]} £, Average experience required to apply: {element[4]} years')
-                            time.sleep(1)
+                        
+                    if not rows:
+                        print('No results for this research!')
                     else:
-                         print("Invalid input!") 
-                except ValueError:
-                    print("Invalid input!")    
+                        table = Table(title=f"Results for {desired_role}:")
+                        table.add_column("Role", justify="center", no_wrap=True)
+                        table.add_column("Average Male Salary", justify="center", no_wrap=True)
+                        table.add_column("Average Male required Experience", justify="center", no_wrap=True)
+                        table.add_column("Average Female Salary", justify="center", no_wrap=True)
+                        table.add_column("Average Female required Experience", justify="center", no_wrap=True)
+
+                        for element in rows:
+                            table.add_row(element[0], str(element[1]), str(element[2]), str(element[3]) , str(element[4]))
+
+                        with console.pager():
+                            console.print(table)
+
+                except Exception as e:
+                    print(e) 
 
             elif desired_query == 2:
                 curs.execute("SELECT DISTINCT country FROM Location ORDER BY country ASC")
