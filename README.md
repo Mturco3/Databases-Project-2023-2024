@@ -5,4 +5,5 @@ The following project aims at recreating the functionalities of a "Job Finder Ap
 ### SQL Interface
 - To load the Dataset, first run the 'main.py' file; in the terminal, the script will ask as input the password for your localhost-root. Wait for the dataset to be fully loaded before continuing.
 - To open the application, run the 'application.py' file; again in the terminal, the script will ask as input the password for your localhost-root. Once the password has been correctly inserted, the application will start by displaying the available queries. 
-   1) The first
+    1) The first query allows the user to explore the 'biased nature' of our dataset by comparing the offered salary and required experience for a selected role between males and females.
+    2) The sec
