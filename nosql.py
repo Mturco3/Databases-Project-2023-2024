@@ -109,7 +109,51 @@ def query1():
 
 
 def query2():
-    ...
+    user_input_industry= input("Specify the desired Industry Name -> ")  # Replace with the user's input
+
+    # Aggregate pipeline to group by industry and contact_person, and count the jobs
+    pipeline = [
+        {
+            "$match": {
+                "Company.industry": user_input_industry
+            }
+        },
+        {
+            "$group": {
+                "_id": {
+                    "industry": "$Company.industry",
+                    "contact_person": "$contact_person",
+                    "contact": "$contact" 
+                },
+                "job_count": {"$sum": 1}
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "industry": "$_id.industry",
+                "contact": "$_id.contact",
+                "contact_person": "$_id.contact_person",
+                "job_count": 1
+            }
+        }
+    ]
+
+    result = jobs_collection.aggregate(pipeline)
+
+    # Display the results
+    table = Table(title=f"Contact People for the {user_input_industry} industry", leading=1, show_lines=True)
+    table.add_column("Contact", style="dim", width=30)
+    table.add_column("Contact Person", style="dim", width=30)
+    table.add_column("Job Count", style="dim", width=10)
+
+    for entry in result:
+        table.add_row(entry["contact"], entry["contact_person"], str(entry["job_count"]))
+
+    with console.pager():
+        console.print(table)
+
+
 
 
 def query3():
@@ -138,7 +182,8 @@ if __name__ == '__main__':
     while True:
         print(Panel(
     ' 0) - Quit\n \
-1) - Find the top 3 most required skills by company',
+1) - Find the top 3 most required skills by company\n \
+2) - Discover who you should contact if you want to work in a given sector',
     title = "[bold yellow]Select the query you want to execute"
         )
     )
@@ -150,5 +195,8 @@ if __name__ == '__main__':
 
         elif desired_query == 1:
             query1()
+        
+        elif desired_query == 2:
+            query2()
 
     console.print("\nGoodbye 👋", style = 'bold #96EFFF')
