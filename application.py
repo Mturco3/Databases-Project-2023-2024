@@ -150,8 +150,8 @@ title = "[bold yellow]Select the query you want to execute"
                 job_titles = [row[0] for row in curs.fetchall()]
                 table = Table(title=f"University Degrees:", box=box.ASCII)
                 table.add_column("Job Titles")
-                for i, job_title in enumerate(job_titles, start=1):
-                    table.add_row(f"{i}. {job_title}")
+                for job_title in job_titles:
+                    table.add_row(job_title)
                 console.print(table)
                 try:
                     selected_degree = input("\nSelect your university degree: ")
