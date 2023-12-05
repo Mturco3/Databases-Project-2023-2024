@@ -145,7 +145,7 @@ def query2():
     table = Table(title=f"Contact People for the {user_input_industry} industry", leading=1, show_lines=True)
     table.add_column("Contact", style="dim", width=30)
     table.add_column("Contact Person", style="dim", width=30)
-    table.add_column("Job Count", style="dim", width=10)
+    table.add_column("Jobs Offered", style="dim", width=10)
 
     for entry in result:
         table.add_row(entry["contact"], entry["contact_person"], str(entry["job_count"]))
