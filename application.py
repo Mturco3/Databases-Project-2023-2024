@@ -27,13 +27,13 @@ def connect_to_database(user, password):
 def display_menu():
             print("") 
             print(Panel(
-              ' 0) - Quit\n \
-                1) - Calculate Average Salary and Average required experience by gender for a selected role\n \
-                2) - Display Job Offers available in a specific Country\n \
-                3) - Search by company name the job portals where the company is present and how many job offers are available\n \
-                4) - Discover the maximum and minimum salary for a given university degree\n \
-                5) - Find the full time avaiable positions in a specific country\n \
-                6) - Search for job offers made in the last year for available roles in a given sector',
+' 0) - Quit\n \
+1) - Calculate Average Salary and Average required experience by gender for a selected role\n \
+2) - Display Job Offers available in a specific Country\n \
+3) - Search by company name the job portals where the company is present and how many job offers are available\n \
+4) - Discover the maximum and minimum salary for a given university degree\n \
+5) - Find the full time avaiable positions in a specific country\n \
+6) - Search for job offers made in the last year for available roles in a given sector',
                 title = "[bold yellow]Select the query you want to execute"
             ))
 
@@ -270,22 +270,36 @@ def main():
 
     while True:
         display_menu()
-        desired_query = int(input('\nYour choice -> '))
         
-        if desired_query == 0:
-            break
-        elif desired_query == 1:
-            query_1(curs, query_file)
-        elif desired_query == 2:
-            query_2(curs, query_file)
-        elif desired_query == 3:
-            query_3(curs, query_file)
-        elif desired_query == 4:
-            query_4(curs, query_file)
-        elif desired_query == 5:
-            query_5(curs, query_file)
-        elif desired_query == 6:
-            query_6(curs, query_file)
+        try:
+            desired_query = int(input('\nYour choice -> '))
+        
+            if desired_query not in range(0, 7):
+                print('[bold red]Please insert a valid number')
+
+            elif desired_query == 0:
+                break
+
+            elif desired_query == 1:
+                query_1(curs, query_file)
+
+            elif desired_query == 2:
+                query_2(curs, query_file)
+
+            elif desired_query == 3:
+                query_3(curs, query_file)
+
+            elif desired_query == 4:
+                query_4(curs, query_file)
+
+            elif desired_query == 5:
+                query_5(curs, query_file)
+
+            elif desired_query == 6:
+                query_6(curs, query_file)
+        
+        except Exception:
+            print("[bold red]Please insert a number")
  
 
     db.close()
