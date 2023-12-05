@@ -59,14 +59,15 @@ WHERE work_type = 'Full-Time'
 SELECT job_id, role, company, job_posting_date
 FROM Offer
 WHERE company IN (SELECT company FROM Company WHERE sector = ':user_sector')
-  AND (location, company) = ALL (
-    SELECT longitude, latitude, company
-    FROM Location
-    WHERE country = ':user_country'
+  AND job_id = ALL (
+    SELECT o.job_id
+    FROM Offer o
+    JOIN Location l ON o.longitude = l.longitude AND o.latitude = l.latitude
+    WHERE l.country = ':user_country'
     UNION
-    SELECT longitude, latitude, company
+    SELECT job_id
     FROM Offer
-    WHERE job_posting_date > '2023-01-01'
+    WHERE job_posting_date > '2020-01-01'
 );
 
     

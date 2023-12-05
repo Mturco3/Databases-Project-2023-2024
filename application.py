@@ -216,7 +216,7 @@ title = "[bold yellow]Select the query you want to execute"
                     print(e) 
 
             elif desired_query == 6:
-                curs.execute("SELECT DISTINCT country FROM Offer ORDER BY country ASC")
+                curs.execute("SELECT DISTINCT country FROM Location ORDER BY country ASC")
                 countries = [row[0] for row in curs.fetchall()]
                 table = Table(title=f"Available countries", box=box.ASCII)
                 table.add_column("Country Name")
@@ -233,9 +233,29 @@ title = "[bold yellow]Select the query you want to execute"
                 console.print(table)
                 # Get user input for the desired role
                 try:
-                    choice1 = int(input("\nEnter the country you prefer: "))
-                    choice2 = int(input("\nEnter the sector you prefer: "))
-                    
+                    selected_country = str(input("\nEnter the country you prefer: "))
+                    selected_sector= str(input("\nEnter the sector you prefer: "))
+                    query = query_file[5].replace(":user_country", selected_country).replace(":user_sector", selected_sector)
+                    curs.execute(query)
+                    rows = curs.fetchall()
+
+                    if not rows:
+                        print('No results for this research!')
+                    else:
+                        table = Table(title=f"{len(rows)} results for {selected_country}:")
+                        table.add_column("Job ID", justify="center", no_wrap=True)
+                        table.add_column("Role", justify="center", no_wrap=True)
+                        table.add_column("Company", justify="center", no_wrap=True)
+                        table.add_column("Job posting date", justify="center", no_wrap=True)
+
+                        for element in rows:
+                            table.add_row(element[0], element[1], str(element[2]), str(element[3]))
+
+                        with console.pager():
+                            console.print(table)
+
+                except Exception as e:
+                    print(e)
                     
 
                      
