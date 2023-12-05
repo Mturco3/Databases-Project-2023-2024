@@ -202,22 +202,28 @@ def query4():
         },
         {
             "$sort": {
-                "company_size": -1  # Sorting in descending order by salary_range
+                "company_size": -1
             }
         },
         {
-            "$limit": 3  # Limit the results to the specified number of top CEOs
+            "$group": {
+                "_id": "$Company.CEO",
+                "Company": {"$first": "$Company.company_name"},
+                "company_size": {"$first": "$company_size"}
+            }
+        },
+        {
+            "$limit": 3
         },
         {
             "$project": {
                 "_id": 0,
-                "CEO": "$Company.CEO",
-                "Company": "$Company.company_name",
-                "company_size": "$company_size"
+                "CEO": "$_id",
+                "Company": 1,
+                "company_size": 1
             }
         }
     ]
-
     result = jobs_collection.aggregate(pipeline_query4)
 
     # Display the results
