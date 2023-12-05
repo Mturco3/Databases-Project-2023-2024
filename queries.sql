@@ -48,7 +48,7 @@ GROUP BY O.qualifications, O.role;
 
 SELECT O.role, O.job_id, O.company
 FROM Offer O
-WHERE work_type = 'Full-Time' 
+WHERE work_type = ':user_work_type' 
   AND O.company IN (
     SELECT C.company
     FROM Company C
@@ -58,8 +58,11 @@ WHERE work_type = 'Full-Time'
 
 SELECT job_id, role, company, job_posting_date
 FROM Offer
-WHERE company IN (SELECT company FROM Company WHERE sector = ':user_sector')
-  AND job_id = ALL (
+WHERE company IN (
+    SELECT company 
+    FROM Company 
+    WHERE sector = ':user_sector')
+AND job_id = ALL (
     SELECT o.job_id
     FROM Offer o
     JOIN Location l ON o.longitude = l.longitude AND o.latitude = l.latitude
@@ -67,8 +70,8 @@ WHERE company IN (SELECT company FROM Company WHERE sector = ':user_sector')
     UNION
     SELECT job_id
     FROM Offer
-    WHERE job_posting_date > '2020-01-01'
-);
+    WHERE work_type = ':user_work_type' );
+
 
     
 

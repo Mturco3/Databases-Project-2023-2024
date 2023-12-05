@@ -194,15 +194,16 @@ title = "[bold yellow]Select the query you want to execute"
                     choice = int(input("\nEnter the number corresponding to the industry you prefer: "))
                     if 1 <= choice <= len(industries):
                         desired_industry = industries[choice - 1]
+                        selected_work_type= str(input("\nEnter the sector you prefer among the following: Full-Time, Part-Time, Contract, Temporary, Intern : "))
                         # Replace the placeholder with the desired role
-                        query = query_file[4].replace(":user_industry", desired_industry)
+                        query = query_file[4].replace(":user_industry", desired_industry).replace(":user_work_type", selected_work_type)
                         curs.execute(query)
                         rows = curs.fetchall()
                          # Display results
                         if not rows:
                             print('No results for this research!')
                         else:
-                            table = Table(title=f"{len(rows)} results for {desired_industry}:")
+                            table = Table(title=f"{len(rows)} results for {desired_industry} industry and {selected_work_type} contract:")
                             table.add_column("Role Avaiable", justify="center", no_wrap=True)
                             table.add_column("Company", justify="center", no_wrap=True)
                             table.add_column("Job ID", justify="center", no_wrap=True)
@@ -235,7 +236,8 @@ title = "[bold yellow]Select the query you want to execute"
                 try:
                     selected_country = str(input("\nEnter the country you prefer: "))
                     selected_sector= str(input("\nEnter the sector you prefer: "))
-                    query = query_file[5].replace(":user_country", selected_country).replace(":user_sector", selected_sector)
+                    selected_work_type= str(input("\nEnter the sector you prefer among the following: Full-Time, Part-Time, Contract, Temporary, Intern : "))
+                    query = query_file[5].replace(":user_country", selected_country).replace(":user_sector", selected_sector).replace(":user_work_type", selected_work_type)
                     curs.execute(query)
                     rows = curs.fetchall()
 
