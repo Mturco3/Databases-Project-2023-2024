@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from rich import print
+from rich import print, box
 
 client = MongoClient('localhost', 27017)
 jobs_db = client.Jobs
@@ -64,180 +64,225 @@ def load_data(data):
 
             
 def query1():
-    user_input_company = input("Specify the desired Company Name -> ")  # Replace with the user's input
+    available_companies = jobs_collection.distinct("Company.company_name")
+    table = Table(title=f"Available companies", box=box.ASCII)
+    table.add_column("Company Names")
+    for n, company in enumerate(available_companies, start=1):
+        table.add_row(f"{n} - {company}")
+    console.print(table)
+        
+    user_input_company = int(input("\nInsert the number corresponding to the desired Company -> "))
 
-    pipeline_query1 = [
-        {
-            "$match": {
-                "Company.company_name": user_input_company
+    if user_input_company in range(1, len(available_companies) + 1): 
+
+        pipeline_query1 = [
+            {
+                "$match": {
+                    "Company.company_name": available_companies[user_input_company - 1]
+                }
+            },
+            {
+                "$unwind": "$Role.skills"
+            },
+            {
+                "$group": {
+                    "_id": "$Role.skills",
+                    "count": {"$sum": 1}
+                }
+            },
+            {
+                "$sort": {"count": -1}
+            },
+            {
+                "$limit": 3
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "skill": "$_id",
+                    "count": 1
+                }
             }
-        },
-        {
-            "$unwind": "$Role.skills"
-        },
-        {
-            "$group": {
-                "_id": "$Role.skills",
-                "count": {"$sum": 1}
-            }
-        },
-        {
-            "$sort": {"count": -1}
-        },
-        {
-            "$limit": 3
-        },
-        {
-            "$project": {
-                "_id": 0,
-                "skill": "$_id",
-                "count": 1
-            }
-        }
-    ]
+        ]
 
-    result = jobs_collection.aggregate(pipeline_query1)
+        result = jobs_collection.aggregate(pipeline_query1)
 
-    table = Table(title=f"Top 3 most common skills required by {user_input_company}", leading=1, show_lines=True)
-    table.add_column("Skill Description")
-    table.add_column("Count", justify="center")
-    for item in result:
-        table.add_row(str(item['skill']), str(item['count']))
+        table = Table(title=f"Top 3 most common skills required by {available_companies[user_input_company - 1]}", leading=1, show_lines=True)
+        table.add_column("Skill Description")
+        table.add_column("Count", justify="center")
+        for item in result:
+            table.add_row(str(item['skill']), str(item['count']))
 
-    with console.pager():
-        console.print(table)
+        with console.pager():
+            console.print(table)
+    else:
+        print("\n[bold red]Please insert a valid number.")
 
 
 def query2():
-    user_input_industry= input("Specify the desired Industry Name -> ")  # Replace with the user's input
+    available_industries = jobs_collection.distinct("Company.industry")
+    table = Table(title=f"Available Industries", box = box.ASCII)
+    table.add_column("Industry Names", no_wrap=True)
+    for n, industry in enumerate(available_industries, start=1):
+        table.add_row(f"{n} - {industry}")
+    console.print(table)
 
-    # Aggregate pipeline2 to group by industry and contact_person, and count the jobs
-    pipeline_query2 = [
-        {
-            "$match": {
-                "Company.industry": user_input_industry
+    user_input_industry = int(input("\nSpecify the desired Industry number -> "))
+
+    if user_input_industry in range(1, len(available_industries) + 1): 
+        pipeline_query2 = [
+            {
+                "$match": {
+                    "Company.industry": available_industries[user_input_industry - 1]
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "industry": "$Company.industry",
+                        "contact_person": "$contact_person",
+                        "contact": "$contact" 
+                    },
+                    "job_count": {"$sum": 1}
+                }
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "industry": "$_id.industry",
+                    "contact": "$_id.contact",
+                    "contact_person": "$_id.contact_person",
+                    "job_count": 1
+                }
             }
-        },
-        {
-            "$group": {
-                "_id": {
-                    "industry": "$Company.industry",
-                    "contact_person": "$contact_person",
-                    "contact": "$contact" 
-                },
-                "job_count": {"$sum": 1}
-            }
-        },
-        {
-            "$project": {
-                "_id": 0,
-                "industry": "$_id.industry",
-                "contact": "$_id.contact",
-                "contact_person": "$_id.contact_person",
-                "job_count": 1
-            }
-        }
-    ]
+        ]
 
-    result = jobs_collection.aggregate(pipeline_query2)
+        result = jobs_collection.aggregate(pipeline_query2)
 
-    # Display the results
-    table = Table(title=f"Contact People for the {user_input_industry} industry", leading=1, show_lines=True)
-    table.add_column("Contact", style="dim", width=30)
-    table.add_column("Contact Person", style="dim", width=30)
-    table.add_column("Jobs Offered", style="dim", width=10)
+        # Display the results
+        table = Table(title=f"Contact People for the {available_industries[user_input_industry - 1]} industry", leading=1, show_lines=True)
+        table.add_column("Contact", style="dim", width=30)
+        table.add_column("Contact Person", style="dim", width=30)
+        table.add_column("Jobs Offered", style="dim", width=10)
 
-    for entry in result:
-        table.add_row(entry["contact"], entry["contact_person"], str(entry["job_count"]))
+        for entry in result:
+            table.add_row(entry["contact"], entry["contact_person"], str(entry["job_count"]))
 
-    with console.pager():
-        console.print(table)
+        with console.pager():
+            console.print(table)
+    
+    else:
+        print("\n[bold red]Please insert a valid number.")
 
 
 
 
 def query3():
-    user_input_state = input("Enter the state to find companies with the most job offerings -> ")
 
-    pipeline_query3 = [
-        {
-            "$match": {
-                "Company.state": user_input_state
+    available_states = jobs_collection.distinct("Company.state")
+    table = Table(title=f"States in the database", box = box.ASCII)
+    table.add_column("State Names", no_wrap=True)
+    for n, state in enumerate(available_states, start=1):
+        table.add_row(f"{n} - {state}")
+    console.print(table)
+
+    user_input_state = int(input("\nEnter the state number to find companies with the most job offerings -> "))
+
+    if user_input_state in range(1, len(available_states) + 1):
+        pipeline_query3 = [
+            {
+                "$match": {
+                    "Company.state": available_states[user_input_state - 1]
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$Company.company_name",
+                    "job_count": {"$sum": 1},
+                    "website": {"$first": "$Company.website"},
+                }
+            },
+            {
+                "$sort": {"job_count": -1}
             }
-        },
-        {
-            "$group": {
-                "_id": "$Company.company_name",
-                "job_count": {"$sum": 1},
-                "website": {"$first": "$Company.website"},
-            }
-        },
-        {
-            "$sort": {"job_count": -1}
-        }
-    ]
+        ]
 
-    result = jobs_collection.aggregate(pipeline_query3)
+        result = jobs_collection.aggregate(pipeline_query3)
 
-    table = Table(title=f"Companies with the highest number of Job Offerings in {user_input_state}", show_lines=True)
-    table.add_column("Company Name")
-    table.add_column("Website")
-    table.add_column("Number of Job Offerings")
+        table = Table(title=f"Companies with the highest number of Job Offerings in {available_states[user_input_state - 1]}", show_lines=True)
+        table.add_column("Company Name")
+        table.add_column("Website")
+        table.add_column("Number of Job Offerings")
 
-    for item in result:
-        table.add_row(item["_id"], item["website"], str(item["job_count"]))
+        for item in result:
+            table.add_row(item["_id"], item["website"], str(item["job_count"]))
 
-    with console.pager():
-        console.print(table)
+        with console.pager():
+            console.print(table)
+    
+    else:
+        print("\n[bold red]Please insert a valid number.")
 
 
 
 def query4():
-    user_input_sector = input("Specify the desired Sector Name -> ")  # Replace with the user's input
-    pipeline_query4 = [
-        {
-            "$match": {
-                "Company.sector": user_input_sector
-            }
-        },
-        {
-            "$sort": {
-                "company_size": -1
-            }
-        },
-        {
-            "$group": {
-                "_id": "$Company.CEO",
-                "Company": {"$first": "$Company.company_name"},
-                "company_size": {"$first": "$company_size"}
-            }
-        },
-        {
-            "$limit": 3
-        },
-        {
-            "$project": {
-                "_id": 0,
-                "CEO": "$_id",
-                "Company": 1,
-                "company_size": 1
-            }
-        }
-    ]
-    result = jobs_collection.aggregate(pipeline_query4)
+    available_sectors = jobs_collection.distinct('Company.sector')
+    table = Table(title=f"Available Sectors", box = box.ASCII)
+    table.add_column("Sector Names", no_wrap=True)
+    for n, sector in enumerate(available_sectors, start=1):
+        table.add_row(f"{n} - {sector}")
+    console.print(table)
 
-    # Display the results
-    table = Table(title=f"Top 3 CEOs offering the Highest Salaries in the {user_input_sector} sector", leading=1, show_lines=True)
-    table.add_column("CEO", style="dim", width=30)
-    table.add_column("Company Name", style="dim", width=30)
-    table.add_column("Company Size", style="dim", width=15)
+    user_input_sector = int(input("Specify the desired Sector Name -> "))
 
-    for entry in result:
-        table.add_row(entry["CEO"],entry["Company"], str(entry["company_size"]))
+    if user_input_sector in range(1, len(available_sectors) + 1):
+        pipeline_query4 = [
+            {
+                "$match": {
+                    "Company.sector": available_sectors[user_input_sector - 1]
+                }
+            },
+            {
+                "$sort": {
+                    "company_size": -1
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$Company.CEO",
+                    "Company": {"$first": "$Company.company_name"},
+                    "company_size": {"$first": "$company_size"}
+                }
+            },
+            {
+                "$limit": 3
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "CEO": "$_id",
+                    "Company": 1,
+                    "company_size": 1
+                }
+            }
+        ]
+        result = jobs_collection.aggregate(pipeline_query4)
 
-    with console.pager():
-        console.print(table)
+        # Display the results
+        table = Table(title=f"Top 3 CEOs offering the Highest Salaries in the {available_sectors[user_input_sector - 1]} sector", leading=1, show_lines=True)
+        table.add_column("CEO", style="dim", width=30)
+        table.add_column("Company Name", style="dim", width=30)
+        table.add_column("Company Size", style="dim", width=15)
 
+        for entry in result:
+            table.add_row(entry["CEO"],entry["Company"], str(entry["company_size"]))
+
+        with console.pager():
+            console.print(table)
+
+    else:
+        print("\n[bold red]Please insert a valid number.")
+    
 
 
 if __name__ == '__main__':
@@ -253,6 +298,7 @@ if __name__ == '__main__':
 
 
     while True:
+        print("")
         print(Panel(
     ' 0) - Quit\n \
 1) - Find the top 3 most required skills by company\n \
@@ -262,22 +308,25 @@ if __name__ == '__main__':
     title = "[bold yellow]Select the query you want to execute"
         )
     )
+        try:
+            desired_query = int(input('\nYour choice -> '))
+            
+            if desired_query == 0:
+                break
 
-        desired_query = int(input('\nYour choice -> '))
-        
-        if desired_query == 0:
-            break
+            elif desired_query == 1:
+                query1()
+            
+            elif desired_query == 2:
+                query2()
+            
+            elif desired_query == 3:
+                query3()
 
-        elif desired_query == 1:
-            query1()
-        
-        elif desired_query == 2:
-            query2()
-        
-        elif desired_query == 3:
-            query3()
+            elif desired_query == 4:
+                query4()
 
-        elif desired_query == 4:
-            query4()
+        except ValueError:
+            print("\n[bold red]Please insert a valid number.")
 
     console.print("\nGoodbye 👋", style = 'bold #96EFFF')
