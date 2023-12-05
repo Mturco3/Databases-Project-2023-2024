@@ -157,7 +157,39 @@ def query2():
 
 
 def query3():
-    ...
+    user_input_state = input("Enter the state to find companies with the most job offerings -> ")
+
+    pipeline_query3 = [
+        {
+            "$match": {
+                "Company.state": user_input_state
+            }
+        },
+        {
+            "$group": {
+                "_id": "$Company.company_name",
+                "job_count": {"$sum": 1},
+                "website": {"$first": "$Company.website"},
+            }
+        },
+        {
+            "$sort": {"job_count": -1}
+        }
+    ]
+
+    result = jobs_collection.aggregate(pipeline_query3)
+
+    table = Table(title=f"Companies with the highest number of Job Offerings in {user_input_state}", show_lines=True)
+    table.add_column("Company Name")
+    table.add_column("Website")
+    table.add_column("Number of Job Offerings")
+
+    for item in result:
+        table.add_row(item["_id"], item["website"], str(item["job_count"]))
+
+    with console.pager():
+        console.print(table)
+
 
 
 def query4():
@@ -183,7 +215,8 @@ if __name__ == '__main__':
         print(Panel(
     ' 0) - Quit\n \
 1) - Find the top 3 most required skills by company\n \
-2) - Discover who you should contact if you want to work in a given industry',
+2) - Discover who you should contact if you want to work in a given industry\n \
+3) - Find out which companies have the highest number of job offerings in a given state',
     title = "[bold yellow]Select the query you want to execute"
         )
     )
@@ -198,5 +231,8 @@ if __name__ == '__main__':
         
         elif desired_query == 2:
             query2()
+        
+        elif desired_query == 3:
+            query3()
 
     console.print("\nGoodbye 👋", style = 'bold #96EFFF')
