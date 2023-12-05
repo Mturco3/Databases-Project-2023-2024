@@ -62,16 +62,7 @@ WHERE company IN (
     SELECT company 
     FROM Company 
     WHERE sector = ':user_sector')
-AND job_id = ALL (
-    SELECT o.job_id
-    FROM Offer o
-    JOIN Location l ON o.longitude = l.longitude AND o.latitude = l.latitude
-    WHERE l.country = ':user_country'
-    UNION
-    SELECT job_id
-    FROM Offer
-    WHERE work_type = ':user_work_type' );
-
+AND job_posting_date > '2023-01-01';
 
     
 
