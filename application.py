@@ -27,7 +27,8 @@ def queries(user, password):
 2) - Display Job Offers available in a specific Country\n \
 3) - Search by company name the job portals where the company is present and how many job offers are available\n \
 4) - Discover the maximum and minimum salary for a given university degree\n \
-5) - Find the full time avaiable positions in a specific country',
+5) - Find the full time avaiable positions in a specific country\n \
+6) - Search for job offers made in the last year in a given country and sector',
 title = "[bold yellow]Select the query you want to execute"
      )
 )
@@ -214,6 +215,27 @@ title = "[bold yellow]Select the query you want to execute"
                 except Exception as e:
                     print(e) 
 
+            elif desired_query == 6:
+                curs.execute("SELECT DISTINCT country FROM Offer ORDER BY country ASC")
+                countries = [row[0] for row in curs.fetchall()]
+                table = Table(title=f"Available countries", box=box.ASCII)
+                table.add_column("Country Name")
+                for country in countries:
+                    table.add_row(country)
+                console.print(table)
+
+                curs.execute("SELECT DISTINCT sector FROM Company ORDER BY sector ASC")
+                sectors = [row[0] for row in curs.fetchall()]
+                table = Table(title=f"Available sectors", box=box.ASCII)
+                table.add_column("Sector Name")
+                for sector in sectors:
+                    table.add_row(sector)
+                console.print(table)
+                # Get user input for the desired role
+                try:
+                    choice1 = int(input("\nEnter the country you prefer: "))
+                    choice2 = int(input("\nEnter the sector you prefer: "))
+                    
                     
 
                      

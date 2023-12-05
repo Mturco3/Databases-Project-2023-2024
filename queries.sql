@@ -56,6 +56,19 @@ WHERE work_type = 'Full-Time'
 );
 
 
+SELECT job_id, role, company, job_posting_date
+FROM Offer
+WHERE company IN (SELECT company FROM Company WHERE sector = ':user_sector')
+  AND (location, company) = ALL (
+    SELECT longitude, latitude, company
+    FROM Location
+    WHERE country = ':user_country'
+    UNION
+    SELECT longitude, latitude, company
+    FROM Offer
+    WHERE job_posting_date > '2023-01-01'
+);
+
     
 
 

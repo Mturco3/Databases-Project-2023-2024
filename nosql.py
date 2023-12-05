@@ -183,7 +183,7 @@ if __name__ == '__main__':
         print(Panel(
     ' 0) - Quit\n \
 1) - Find the top 3 most required skills by company\n \
-2) - Discover who you should contact if you want to work in a given sector',
+2) - Discover who you should contact if you want to work in a given industry',
     title = "[bold yellow]Select the query you want to execute"
         )
     )
