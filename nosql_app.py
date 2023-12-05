@@ -233,7 +233,7 @@ def query4():
         table.add_row(f"{n} - {sector}")
     console.print(table)
 
-    user_input_sector = int(input("Specify the desired Sector Name -> "))
+    user_input_sector = int(input("Specify the desired 'Sector Name' corresponding number -> "))
 
     if user_input_sector in range(1, len(available_sectors) + 1):
         pipeline_query4 = [
@@ -269,13 +269,13 @@ def query4():
         result = jobs_collection.aggregate(pipeline_query4)
 
         # Display the results
-        table = Table(title=f"Top 3 CEOs offering the Highest Salaries in the {available_sectors[user_input_sector - 1]} sector", leading=1, show_lines=True)
+        table = Table(title=f"Top 3 CEOs of the largest companies in the {available_sectors[user_input_sector - 1]} sector", leading=1, show_lines=True)
         table.add_column("CEO", style="dim", width=30)
         table.add_column("Company Name", style="dim", width=30)
         table.add_column("Company Size", style="dim", width=15)
 
         for entry in result:
-            table.add_row(entry["CEO"],entry["Company"], str(entry["company_size"]))
+            table.add_row(str(entry["CEO"]),str(entry["Company"]), str(entry["company_size"]))
 
         with console.pager():
             console.print(table)
@@ -334,6 +334,9 @@ if __name__ == '__main__':
 
             elif desired_query == 4:
                 query4()
+
+            elif desired_query not in [0,1,2,3,4]:
+                print("\n[bold red]Please insert a valid number.")
 
         except ValueError:
             print("\n[bold red]Please insert a valid number.")

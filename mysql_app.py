@@ -193,7 +193,7 @@ def query_5(curs,query_file):
         choice = int(input("\nEnter the number corresponding to the industry you prefer: "))
         if 1 <= choice <= len(industries):
             desired_industry = industries[choice - 1]
-            selected_work_type= str(input("\nEnter the sector you prefer among the following: Full-Time, Part-Time, Contract, Temporary, Intern : "))
+            selected_work_type= str(input("\nEnter the contract type you prefer among the following: Full-Time, Part-Time, Contract, Temporary, Intern : "))
             if selected_work_type not in ['Full-Time','Part-Time','Contract','Temporary','Intern']:
                 print('[bold red]Plese select a valid Contract Type')
             # Replace the placeholder with the desired role
