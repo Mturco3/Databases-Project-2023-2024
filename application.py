@@ -21,6 +21,7 @@ def queries(user, password):
         db.commit()
 
         while True:
+            print("") # add spacing
             print(Panel(
 ' 0) - Quit\n \
 1) - Calculate Average Salary and Average required experience by gender for a selected role\n \
@@ -78,7 +79,7 @@ title = "[bold yellow]Select the query you want to execute"
                             console.print(table)
 
                 except Exception as e:
-                    print(e) 
+                    print('[bold red]Please insert a valid input') 
 
             elif desired_query == 2:
                 curs.execute("SELECT DISTINCT country FROM Location ORDER BY country ASC")
@@ -110,7 +111,7 @@ title = "[bold yellow]Select the query you want to execute"
                             console.print(table)
 
                 except Exception as e:
-                    print(e)
+                    print('[bold red]Please insert a valid input') 
 
             elif desired_query == 3:
                 curs.execute("SELECT DISTINCT company FROM Company ORDER BY company ASC")
@@ -144,7 +145,7 @@ title = "[bold yellow]Select the query you want to execute"
                         with console.pager():
                             console.print(table) 
                 except Exception as e:
-                    print(e) 
+                    print('[bold red]Please insert a valid input') 
 
             elif desired_query == 4:
                 curs.execute("SELECT DISTINCT qualifications FROM Offer ORDER BY qualifications ASC")
@@ -178,7 +179,7 @@ title = "[bold yellow]Select the query you want to execute"
 
  
                 except ValueError:
-                    print("Invalid input!")  
+                    print('[bold red]Please insert a valid input') 
 
             elif desired_query == 5:
                 curs.execute("SELECT DISTINCT industry FROM Company ORDER BY industry ASC")
@@ -214,7 +215,7 @@ title = "[bold yellow]Select the query you want to execute"
                         with console.pager():
                             console.print(table) 
                 except Exception as e:
-                    print(e) 
+                    print('[bold red]Please insert a valid input') 
 
             elif desired_query == 6:
                 curs.execute("SELECT DISTINCT sector FROM Company ORDER BY sector ASC")
@@ -247,7 +248,7 @@ title = "[bold yellow]Select the query you want to execute"
                             console.print(table)
 
                 except Exception as e:
-                    print(e)
+                    print('[bold red]Please insert a valid input') 
                     
 
                      
