@@ -66,7 +66,7 @@ def load_data(data):
 def query1():
     user_input_company = input("Specify the desired Company Name -> ")  # Replace with the user's input
 
-    pipeline_dynamic = [
+    pipeline_query1 = [
         {
             "$match": {
                 "Company.company_name": user_input_company
@@ -96,7 +96,7 @@ def query1():
         }
     ]
 
-    result = jobs_collection.aggregate(pipeline_dynamic)
+    result = jobs_collection.aggregate(pipeline_query1)
 
     table = Table(title=f"Top 3 most common skills required by {user_input_company}", leading=1, show_lines=True)
     table.add_column("Skill Description")
@@ -111,8 +111,8 @@ def query1():
 def query2():
     user_input_industry= input("Specify the desired Industry Name -> ")  # Replace with the user's input
 
-    # Aggregate pipeline to group by industry and contact_person, and count the jobs
-    pipeline = [
+    # Aggregate pipeline2 to group by industry and contact_person, and count the jobs
+    pipeline_query2 = [
         {
             "$match": {
                 "Company.industry": user_input_industry
@@ -139,7 +139,7 @@ def query2():
         }
     ]
 
-    result = jobs_collection.aggregate(pipeline)
+    result = jobs_collection.aggregate(pipeline_query2)
 
     # Display the results
     table = Table(title=f"Contact People for the {user_input_industry} industry", leading=1, show_lines=True)
@@ -193,7 +193,46 @@ def query3():
 
 
 def query4():
-    ...
+    user_input_sector = input("Specify the desired Sector Name -> ")  # Replace with the user's input
+    pipeline_query4 = [
+        {
+            "$match": {
+                "Company.sector": user_input_sector
+            }
+        },
+        {
+            "$sort": {
+                "company_size": -1  # Sorting in descending order by salary_range
+            }
+        },
+        {
+            "$limit": 3  # Limit the results to the specified number of top CEOs
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "CEO": "$Company.CEO",
+                "Company": "$Company.company_name",
+                "company_size": "$company_size"
+            }
+        }
+    ]
+
+    result = jobs_collection.aggregate(pipeline_query4)
+
+    # Display the results
+    table = Table(title=f"Top 3 CEOs offering the Highest Salaries in the {user_input_sector} sector", leading=1, show_lines=True)
+    table.add_column("CEO", style="dim", width=30)
+    table.add_column("Company Name", style="dim", width=30)
+    table.add_column("Company Size", style="dim", width=15)
+
+    for entry in result:
+        table.add_row(entry["CEO"],entry["Company"], str(entry["company_size"]))
+
+    with console.pager():
+        console.print(table)
+
+
 
 if __name__ == '__main__':
     # Print out existing databases and collections
@@ -206,17 +245,14 @@ if __name__ == '__main__':
     if jobs_collection.count_documents(filter = {}) == 0:
         load_data(data)
 
-    # Print out the first 5 elements in the database
-    # cursor = jobs_collection.find()
-    # for document in cursor[:5]:
-    #     printer.pprint(document)
 
     while True:
         print(Panel(
     ' 0) - Quit\n \
 1) - Find the top 3 most required skills by company\n \
 2) - Discover who you should contact if you want to work in a given industry\n \
-3) - Find out which companies have the highest number of job offerings in a given state',
+3) - Find out which companies have the highest number of job offerings in a given state\n \
+4) - Discover the CEOs of the largest companies by sector',
     title = "[bold yellow]Select the query you want to execute"
         )
     )
@@ -234,5 +270,8 @@ if __name__ == '__main__':
         
         elif desired_query == 3:
             query3()
+
+        elif desired_query == 4:
+            query4()
 
     console.print("\nGoodbye 👋", style = 'bold #96EFFF')
