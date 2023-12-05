@@ -28,11 +28,11 @@ def display_menu():
             print("") 
             print(Panel(
 ' 0) - Quit\n \
-1) - Calculate Average Salary and Average required experience by gender for a selected role\n \
-2) - Display Job Offers available in a specific Country\n \
+1) - Calculate average salary and average required experience by gender for a selected role\n \
+2) - Display job offers available in a specific country\n \
 3) - Search by company name the job portals where the company is present and how many job offers are available\n \
 4) - Discover the maximum and minimum salary for a given university degree\n \
-5) - Find the full time avaiable positions in a specific country\n \
+5) - Find the working positions available in a specific industry according to the type of contract\n \
 6) - Search for job offers made in the last year for available roles in a given sector',
                 title = "[bold yellow]Select the query you want to execute"
             ))
@@ -194,25 +194,28 @@ def query_5(curs,query_file):
         if 1 <= choice <= len(industries):
             desired_industry = industries[choice - 1]
             selected_work_type= str(input("\nEnter the sector you prefer among the following: Full-Time, Part-Time, Contract, Temporary, Intern : "))
+            if selected_work_type not in ['Full-Time','Part-Time','Contract','Temporary','Intern']:
+                print('[bold red]Plese select a valid Contract Type')
             # Replace the placeholder with the desired role
-            query = query_file[4].replace(":user_industry", desired_industry).replace(":user_work_type", selected_work_type)
-            curs.execute(query)
-            rows = curs.fetchall()
+            else:
+                query = query_file[4].replace(":user_industry", desired_industry).replace(":user_work_type", selected_work_type)
+                curs.execute(query) 
+                rows = curs.fetchall()
 
              # Display results
-            if not rows:
-                print('No results for this research!')
-            else:
-                table = Table(title=f"{len(rows)} results for {desired_industry} industry and {selected_work_type} contract:")
-                table.add_column("Role Avaiable", justify="center", no_wrap=True)
-                table.add_column("Company", justify="center", no_wrap=True)
-                table.add_column("Job ID", justify="center", no_wrap=True)
+                if not rows:
+                    print('No results for this research!')
+                else:
+                    table = Table(title=f"{len(rows)} results for {desired_industry} industry and {selected_work_type} contract:")
+                    table.add_column("Role Avaiable", justify="center", no_wrap=True)
+                    table.add_column("Company", justify="center", no_wrap=True)
+                    table.add_column("Job ID", justify="center", no_wrap=True)
                         
-            for element in rows:
-                table.add_row(str(element[0]), str(element[2]), str(element[1]))
+                    for element in rows:
+                        table.add_row(str(element[0]), str(element[2]), str(element[1]))
 
-            with console.pager():
-                console.print(table) 
+                    with console.pager():
+                        console.print(table) 
     except Exception as e:
         print('[bold red]Please insert a valid input') 
 
