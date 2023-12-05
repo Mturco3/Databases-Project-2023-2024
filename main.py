@@ -55,7 +55,6 @@ def creattables(user:str,passw:str):
                     "role VARCHAR(255) NOT NULL PRIMARY KEY" \
                     ");"
 
-    # No unique values in this table
     company = "CREATE TABLE Company("\
                     "company VARCHAR(255) NOT NULL PRIMARY KEY," \
                     "city VARCHAR(255)," \

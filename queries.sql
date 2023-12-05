@@ -32,7 +32,7 @@ SELECT
     COUNT(O.job_portal) AS job_offer_count
 FROM Company C
 JOIN Offer O ON C.company = O.company
-WHERE C.company = ':user_company'  -- Replace 'YourCompany' with the specific company name you're searching for
+WHERE C.company = ':user_company' -- Specify a desired company
 GROUP BY C.company, O.job_portal;
 
 SELECT
@@ -43,16 +43,16 @@ SELECT
     ROUND(MAX(O.max_experience_years),1) AS max_experience,
     ROUND(MIN(O.min_experience_years),1) AS min_experience
 FROM Offer O
-WHERE O.qualifications = ':user_input'-- Replace 'YourJob' with the specific job title you're searching for
+WHERE O.qualifications = ':user_input' -- Specify a desired qualification
 GROUP BY O.qualifications, O.role;
 
 SELECT O.role, O.job_id, O.company
 FROM Offer O
-WHERE work_type = ':user_work_type' 
+WHERE work_type = ':user_work_type' -- Specify a desired work type 
   AND O.company IN (
     SELECT C.company
     FROM Company C
-    WHERE C.industry = ':user_industry'  -- Replace 'YourIndustry' with the specific industry you're interested in
+    WHERE C.industry = ':user_industry' -- Specify a desired industry
 );
 
 
@@ -61,7 +61,7 @@ FROM Offer
 WHERE company IN (
     SELECT company 
     FROM Company 
-    WHERE sector = ':user_sector')
+    WHERE sector = ':user_sector') -- Specify a desired sector
 AND job_posting_date > '2023-01-01';
 
     
