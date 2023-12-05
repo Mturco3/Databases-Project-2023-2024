@@ -1,31 +1,8 @@
 # Databases-Project-2023-2024
-### Project Description  
-### Project Deadlines  
-- Submission of ER Diagram (Deliverable 1): October 27, 2023 (before 11:59 PM).
-- Submission of SQL and Python Application (Deliverable 2): December 1, 2023 (before 11:59 PM)
-- Submission of CRUD on MongoDB and Python Application (Deliverable 2): December 1, 2023
-(before 11:59 PM)
-# Possible complex queries to database:
-#     # Get all offers from a company (that the user can insert as input) in a specific location (input from user) with a specific role (input from user):
-#     ## the query should return the job_id, work_type, job_title, role, and job_description
-#     # Compute the average salary and average required experience for a specific role (input from user) both for male and female candidates
-#     ## the query should return the two averages both for male and female candidates (check preference attribute in Offer table)
-#     # retrurn all roles avaiable with their max salary and the company that offers the max salary for that role
-
-
-with open('test_query.sql') as f:
-                query_file = f.read()
-                queries = query_file.split(';')
-                # Get user input for the desired role
-                desired_role = input("Enter the role you prefer: ")
-                
-                # Replace the placeholder in the query with user input
-                query = query_file.replace(":user_role", desired_role)
-                curs.execute(queries[desired_query - 1])
-                rows = curs.fetchall()
-                if not rows:
-                    print('No results for this research!')
-                else:
-                    print('Here are the results of your research:')
-                    print([x for x in rows])
-                    time.sleep(1)
+## A Brief Introduction
+The following project aims at recreating the functionalities of a "Job Finder Application" by extracting data from a given csv file, while gaining some insightful analysis of the provided dataset. The users will be able to run the suggested queries and insert their desired inputs thanks to our python application with two different interfaces: a SQL based interface and a NoSQL one.
+## To Run Our Application:
+### SQL Interface
+- To load the Dataset, first run the 'main.py' file; in the terminal, the script will ask as input the password for your localhost-root. Wait for the dataset to be fully loaded before continuing.
+- To open the application, run the 'application.py' file; again in the terminal, the script will ask as input the password for your localhost-root. Once the password has been correctly inserted, the application will start by displaying the available queries. 
+   1) The first
