@@ -150,7 +150,7 @@ def query_4(curs,query_file):
     curs.execute("SELECT DISTINCT qualifications FROM Offer ORDER BY qualifications ASC")
     job_titles = [row[0] for row in curs.fetchall()]
     table = Table(title=f"University Degrees:", box=box.ASCII)
-    table.add_column("Job Titles")
+    table.add_column("Degree Name")
     for job_title in job_titles:
         table.add_row(job_title)
     console.print(table)
@@ -167,11 +167,11 @@ def query_4(curs,query_file):
             table.add_column("Role", justify="center", no_wrap=True)
             table.add_column("Max Salary", justify="center", no_wrap=True)
             table.add_column("Min Salary", justify="center", no_wrap=True)
-            table.add_column("Max Experience", justify="center", no_wrap=True)
             table.add_column("Min Experience", justify="center", no_wrap=True)
+            table.add_column("Max Experience", justify="center", no_wrap=True)
 
             for element in rows:
-                table.add_row(str(element[1]), str(element[2]), str(element[3]), str(element[4]), str(element[5]))
+                table.add_row(str(element[1]), str(element[2]), str(element[3]), str(element[5]),str(element[4]))
 
             with console.pager():
                 console.print(table)
