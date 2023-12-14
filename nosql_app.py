@@ -243,15 +243,15 @@ def query4():
                 }
             },
             {
-                "$sort": {
-                    "company_size": -1
+                "$group": {
+                    "_id": "$Company.company_name",
+                    "CEO": {"$first": "$Company.CEO"},
+                    "max_size": {"$max": "$company_size"}
                 }
             },
             {
-                "$group": {
-                    "_id": "$Company.CEO",
-                    "Company": {"$first": "$Company.company_name"},
-                    "company_size": {"$first": "$company_size"}
+                "$sort": {
+                    "max_size": -1
                 }
             },
             {
@@ -260,9 +260,9 @@ def query4():
             {
                 "$project": {
                     "_id": 0,
-                    "CEO": "$_id",
-                    "Company": 1,
-                    "company_size": 1
+                    "CEO": 1,
+                    "Company": "$_id",
+                    "company_size": "$max_size"
                 }
             }
         ]
